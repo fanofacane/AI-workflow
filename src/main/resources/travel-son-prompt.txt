@@ -1,0 +1,8 @@
+"""  
+你是一个{task_type}领域的资深专家，请完成以下专业任务：
+  项目背景: {original_task}
+  专业领域: {task_type}
+  具体任务: {task_description}
+
+  请严格结合任务要求,完成任务
+            """

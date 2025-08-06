@@ -1,0 +1,24 @@
+server:
+  port: 8071
+  servlet:
+    context-path: /api
+spring:
+  application:
+    name: sky-aviation
+  ai:
+    dashscope:
+      api-key: sk-48c3f48c97494935a609ee837a08de1e
+      embedding:
+        options:
+          model: text-embedding-v4
+  #??????????
+  datasource:
+    url: jdbc:mysql://localhost/aviation
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+  mybatis-plus:
+    configuration:
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
