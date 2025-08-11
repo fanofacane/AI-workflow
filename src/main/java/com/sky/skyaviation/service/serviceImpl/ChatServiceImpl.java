@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -51,38 +49,38 @@ public class ChatServiceImpl implements ChatService {
     }*/
         @Override
         public Flux<String> AiService(String msg) {
-            String recommend = recommend2(msg);
-            return chatClient.prompt()
-                    .system("""  
-                    将以下内容格式化为专业文档:
-                    请添加适当的标题层级、列表、表格等格式，生成最终的markdown文档。
-                    """)
-                    .user(recommend)
-                    .stream()
-                    .content();
+            return recommend2(msg);
+//            return chatClient.prompt()
+//                    .system("""
+//                    将以下内容格式化为专业文档:
+//                    请添加适当的标题层级、列表、表格等格式，生成最终的markdown文档。
+//                    """)
+//                    .user(recommend)
+//                    .stream()
+//                    .content();
         }
-    public String recommend2(String taskDescription) {
+    public Flux<String> recommend2(String taskDescription) {
         System.out.println("=== 开始处理任务 ===");
 
         // 获取子任务列表
         OrchestratorResponse orchestratorResponse = chatClient.prompt()
-                .system(p -> p.param("task", taskDescription))
-                .user(systemPrompt)
+                .system(systemPrompt)
+                .user("我的任务是:"+taskDescription)
                 .call()
                 .entity(OrchestratorResponse.class);
 
         System.out.println("子任务列表: " + orchestratorResponse);
 
         // 并行处理所有子任务
-        List<CompletableFuture<String>> futures = orchestratorResponse.tasks().stream()
+        List<CompletableFuture<Flux<String>>> futures = orchestratorResponse.tasks().stream()
                 .map(task -> CompletableFuture.supplyAsync(() -> {
-                    System.out.println("-----------------------------------处理子任务: " + task.type() + "--------------------------------");
-                    String content = chatClient.prompt()
+                    System.out.println("-----------------------------------处理子任务: " + task.type()+task.description() + "--------------------------------");
+                    Flux<String> content = chatClient.prompt()
                             .user(u -> u.text(sonPromp)
                                     .param("original_task", taskDescription)
                                     .param("task_type", task.type())
                                     .param("task_description", task.description()))
-                            .call()
+                            .stream()
                             .content();
                     System.out.println("子任务处理结果: " + content);
                     // 这里可以根据需要更新task的内容
@@ -91,13 +89,12 @@ public class ChatServiceImpl implements ChatService {
                 .toList();
 
         // 等待所有并行任务完成并收集结果
-        List<String> taskList = futures.stream()
+        List<Flux<String>> taskList = futures.stream()
                 .map(CompletableFuture::join)
                         .toList();
-
         System.out.println("=== 所有工作者完成任务 ===");
-        System.out.println("最终结果: "+ taskList.toString());
-        return taskList.toString();
+        System.out.println("最终结果: "+ taskList);
+        return Flux.concat(taskList);
     }
     public String recommend(String requirements) {
         String currentOutput;

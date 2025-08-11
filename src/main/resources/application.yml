@@ -3,6 +3,13 @@ server:
   servlet:
     context-path: /api
 spring:
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 100
+      thread-name-prefix: async-executor-
   application:
     name: sky-aviation
   ai:
@@ -20,5 +27,8 @@ spring:
   mybatis-plus:
     configuration:
       log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
 
 

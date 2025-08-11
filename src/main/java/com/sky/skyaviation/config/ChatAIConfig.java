@@ -1,4 +1,5 @@
 package com.sky.skyaviation.config;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
@@ -19,6 +20,7 @@ import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfig
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import java.time.Duration;
@@ -26,9 +28,12 @@ import java.time.Duration;
 @Configuration
 public class ChatAIConfig {
     @Bean
-    public ChatMemoryRepository chatMemoryRepository(){return new InMemoryChatMemoryRepository();}
+    public ChatMemoryRepository chatMemoryRepository() {
+        return new InMemoryChatMemoryRepository();
+    }
+
     @Bean
-    public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository){
+    public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository) {
         return MessageWindowChatMemory.builder().chatMemoryRepository(chatMemoryRepository).build();
     }
 
@@ -40,10 +45,11 @@ public class ChatAIConfig {
         return ChatClient
                 .builder(dashScopeChatModel)
                 .defaultAdvisors(PromptChatMemoryAdvisor.builder(chatMemory).build())
-                .defaultTools(toolsService)
+//                .defaultTools(toolsService)
 //                .defaultSystem(systemPrompt)
                 .build();
     }
+
     @Bean
     public RestClient.Builder restClientBuilder() {
         var requestFactory = new SimpleClientHttpRequestFactory();
@@ -57,4 +63,5 @@ public class ChatAIConfig {
     public VectorStore vectorStore(DashScopeEmbeddingModel dashScopeEmbedding) {
         return SimpleVectorStore.builder(dashScopeEmbedding).build();
     }
+
 }

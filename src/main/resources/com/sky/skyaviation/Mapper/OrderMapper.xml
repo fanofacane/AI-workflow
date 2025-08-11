@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.skyaviation.Mapper.OrderMapper">
+    <!--根据ID更新员工基本信息-->
+    <!--set标签: 会自动生成set关键字; 会自动的删除掉更新字段后多余,-->
+
+    <!-- 批量插入订单数据 -->
+    <insert id="insertBatchSomeColumn" parameterType="java.util.List">
+        INSERT INTO orders (
+        passenger_id,
+        flight_number,
+        departure_city,
+        arrival_city,
+        departure_time,
+        arrival_time,
+        plane_name,
+        cabin_type,
+        price,
+        order_time
+        ) VALUES
+        <foreach collection="OrderList" item="item" separator=",">
+            (
+            #{item.passengerId},
+            #{item.flightNumber},
+            #{item.departureCity},
+            #{item.arrivalCity},
+            #{item.departureTime},
+            #{item.arrivalTime},
+            #{item.planeName},
+            #{item.cabinType},
+            #{item.price},
+            #{item.orderTime}
+            )
+        </foreach>
+    </insert>
+</mapper>
